@@ -51,6 +51,31 @@ The infrastructure contains three services:
 
 ---
 
+## Project Structure
+
+```
+inception/
+├── Makefile
+├── README.md
+├── srcs/
+    ├── .env                  # environment variables (not committed)
+    ├── docker-compose.yml
+    └── requirements/
+        ├── mariadb/
+        │   ├── Dockerfile
+        │   └── tools/mariadb_init.sh
+        ├── nginx/
+        │   ├── Dockerfile
+        │   └── conf/nginx.conf
+        ├── wordpress/
+            ├── Dockerfile
+            ├── conf/www.conf
+            └── tools/wordpress_init.sh
+
+```
+
+---
+
 ## Instructions
 
 ### Prerequisites
