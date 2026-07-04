@@ -41,7 +41,7 @@ To stop all containers:
 make down
 ```
 
-To remove containers, images, networks, and volumes (if supported by your Makefile):
+To remove containers, images, networks:
 
 ```bash
 make clean

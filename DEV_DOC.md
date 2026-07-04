@@ -44,13 +44,7 @@ No passwords should be hardcoded inside the Dockerfiles or configuration files.
 From the project root:
 
 ```bash
-make
-```
-
-or, directly with Docker Compose:
-
-```bash
-docker compose -f srcs/docker-compose.yml up --build
+make rebuild
 ```
 
 To stop the project:
@@ -94,7 +88,7 @@ docker exec -it mariadb bash
 Stop all services:
 
 ```bash
-docker compose -f srcs/docker-compose.yml down
+make down
 ```
 
 ---

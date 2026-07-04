@@ -12,4 +12,4 @@ rebuild:
 clean:
 	$(COMPOSE) down --rmi all
 
-re: down up
+re: down rebuild

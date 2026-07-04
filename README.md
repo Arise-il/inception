@@ -63,13 +63,14 @@ The infrastructure contains three services:
 
 ```bash
 git clone <repository-url>
+
 cd inception
 
 echo "127.0.0.1 iel-ghou.42.fr" | sudo tee -a /etc/hosts
 
 mkdir -p /home/iel-ghou/data/{mariadb,wordpress}
 
-make
+make up
 ```
 
 Open:
@@ -83,7 +84,7 @@ Accept the browser warning for the self-signed certificate.
 ### Useful Commands
 
 ```bash
-make          # Build and start the project
+make rebuild  # Build and start the project
 make down     # Stop all containers
 make re       # Rebuild and restart
 make clean    # Remove containers and images
@@ -111,4 +112,4 @@ Credentials are configured in `srcs/.env`.
 
 ### AI Usage
 
-ChatGPT was used as a learning assistant throughout the project. It was used to explain Docker concepts, review configuration files, clarify NGINX, PHP-FPM, and MariaDB behavior, and suggest improvements to the documentation. All implementation, testing, debugging, and final validation were completed manually.
+AI was used as a learning assistant throughout the project. It was used to explain Docker concepts, review configuration files, clarify NGINX, PHP-FPM, and MariaDB behavior, and suggest improvements to the documentation. All implementation, testing, debugging, and final validation were completed manually.
