@@ -1,16 +1,18 @@
-FROM debian:bullseye
+# Penultimate stable Alpine release
+FROM alpine:3.20
 
-RUN apt-get update && \
-    apt-get install -y nginx openssl
+ARG DOMAIN_NAME=login.42.fr
 
-RUN mkdir -p /etc/nginx/certs && \
-    openssl req -x509 -nodes -days 365 \
-    -newkey rsa:2048 \
-    -keyout /etc/nginx/certs/nginx-selfsigned.key \
-    -out /etc/nginx/certs/nginx-selfsigned.crt \
-    -subj "/C=MA/ST=Bengeruir/L=Bengeruir/O=42/OU=1337/CN=iel-ghou.42.fr/UID=iel-ghou"
+RUN apk update && apk add --no-cache nginx openssl
+
+RUN mkdir -p /etc/nginx/ssl && \
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/nginx/ssl/inception.key \
+    -out /etc/nginx/ssl/inception.crt \
+    -subj "/C=MA/ST=Casablanca/L=Casablanca/O=42Network/CN=${DOMAIN_NAME}"
 
 COPY conf/nginx.conf /etc/nginx/nginx.conf
+RUN sed -i "s/login.42.fr/${DOMAIN_NAME}/" /etc/nginx/nginx.conf
 
 EXPOSE 443
 

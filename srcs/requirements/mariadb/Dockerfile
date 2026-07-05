@@ -1,9 +1,17 @@
-FROM debian:bullseye
+# Penultimate stable Alpine release
+FROM alpine:3.20
 
-RUN apt-get update && apt-get install -y mariadb-server
+RUN apk update && apk add --no-cache \
+    mariadb \
+    mariadb-client \
+    bash
 
-COPY tools/mariadb_init.sh /usr/local/bin/mariadb_init.sh
+COPY conf/my.cnf /etc/my.cnf.d/my.cnf
+COPY tools/init_db.sh /usr/local/bin/init_db.sh
+RUN chmod +x /usr/local/bin/init_db.sh && \
+    mkdir -p /run/mysqld /var/lib/mysql && \
+    chown -R mysql:mysql /run/mysqld /var/lib/mysql
 
-RUN chmod +x /usr/local/bin/mariadb_init.sh
+EXPOSE 3306
 
-ENTRYPOINT ["/usr/local/bin/mariadb_init.sh"]
+ENTRYPOINT ["/usr/local/bin/init_db.sh"]

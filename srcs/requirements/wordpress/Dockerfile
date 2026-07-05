@@ -1,23 +1,44 @@
-FROM debian:bullseye
+# Penultimate stable Alpine release
+FROM alpine:3.20
 
-RUN apt-get update && apt-get install -y \
-    php7.4-fpm \
-    php7.4-mysql \
+RUN apk update && apk add --no-cache \
+    php83 \
+    php83-fpm \
+    php83-mysqli \
+    php83-json \
+    php83-curl \
+    php83-dom \
+    php83-exif \
+    php83-fileinfo \
+    php83-mbstring \
+    php83-openssl \
+    php83-phar \
+    php83-session \
+    php83-xml \
+    php83-zip \
+    php83-gd \
+    php83-opcache \
+    php83-ctype \
+    php83-tokenizer \
+    php83-simplexml \
     curl \
+    tar \
+    bash \
     mariadb-client \
-    unzip
+    && ln -sf /usr/bin/php83 /usr/bin/php
 
-RUN mkdir -p /run/php/
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
+RUN echo "memory_limit = 512M" > /etc/php83/conf.d/99-wp-cli.ini
+
+RUN curl -fsSL -o /usr/local/bin/wp \
+    https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x /usr/local/bin/wp
+
+COPY conf/www.conf /etc/php83/php-fpm.d/www.conf
+COPY tools/setup_wordpress.sh /usr/local/bin/setup_wordpress.sh
+RUN chmod +x /usr/local/bin/setup_wordpress.sh
 
 WORKDIR /var/www/html
 
-COPY tools/wordpress_init.sh /usr/local/bin/wordpress_init.sh
-COPY conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
-
-RUN chmod +x /usr/local/bin/wordpress_init.sh
-
 EXPOSE 9000
 
-ENTRYPOINT ["/usr/local/bin/wordpress_init.sh"]
-CMD ["php-fpm7.4","-F"]
+ENTRYPOINT ["/usr/local/bin/setup_wordpress.sh"]
