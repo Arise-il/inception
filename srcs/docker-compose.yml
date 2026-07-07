@@ -14,8 +14,6 @@ services:
       - mariadb_data:/var/lib/mysql
     networks:
       - inception
-    expose:
-      - "3306"
 
   wordpress:
     build:
@@ -34,8 +32,6 @@ services:
       - inception
     depends_on:
       - mariadb
-    expose:
-      - "9000"
 
   nginx:
     build:

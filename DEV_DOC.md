@@ -1,107 +1,86 @@
-# DEV_DOC.md
-
 # Developer Documentation
 
-## Environment Setup
+## Prerequisites
 
-### Prerequisites
+- A Linux virtual machine (per subject requirements — this cannot run on the host
+  directly).
+- Docker Engine and the Docker Compose plugin (`docker compose version`).
+- `make`.
+- A `login.42.fr` DNS entry pointing at the VM's local IP (e.g. via `/etc/hosts`).
 
-Before building the project, install:
+## Setting up the environment from scratch
 
-* Docker Engine
-* Docker Compose
-* Git
-* A Linux virtual machine (required by the subject)
+1. Clone the repository.
+2. Edit `srcs/.env`:
+   - `LOGIN` → your 42 login (used to build the `/home/<login>/data` volume paths).
+   - `DOMAIN_NAME` → `<login>.42.fr`.
+   - Adjust `MYSQL_DATABASE`, `MYSQL_USER`, `WP_*` values if desired.
+3. Edit the four files in `secrets/` and replace every `ChangeMe_*` placeholder with a
+   real, private password. **Never commit real secrets** — `secrets/` is git-ignored.
 
-### Configuration
+Directory layout:
 
-Create the required data directories:
+```
+.
+├── Makefile
+├── secrets/                  # git-ignored, one password per file
+├── srcs/
+│   ├── .env                  # git-ignored, non-secret config
+│   ├── docker-compose.yml
+│   └── requirements/
+│       ├── mariadb/{Dockerfile, conf/, tools/}
+│       ├── nginx/{Dockerfile, conf/, tools/}
+│       └── wordpress/{Dockerfile, conf/, tools/}
+```
+
+## Building and launching with the Makefile / Docker Compose
 
 ```bash
-mkdir -p /home/iel-ghou/data/mariadb
-mkdir -p /home/iel-ghou/data/wordpress
+make build   # docker compose build (uses each requirements/<service>/Dockerfile)
+make up      # build (if needed) + docker compose up -d
+make down    # docker compose down
+make re      # fclean + all: full rebuild from a clean slate
 ```
 
-Add this line to your `/etc/hosts` file so the domain points to your local machine:
+Under the hood, `make` always targets `srcs/docker-compose.yml` and `srcs/.env`
+explicitly, and creates the host data directories (`/home/<login>/data/{mariadb,wordpress}`)
+before starting the stack, since Docker will not auto-create bind-backed volume
+device paths.
 
-```text
-127.0.0.1    iel-ghou.42.fr
-```
-
-Create a `.env` file inside `srcs/` containing the required variables, such as:
-
-* Domain name
-* MariaDB credentials
-* WordPress administrator credentials
-* WordPress user credentials
-
-No passwords should be hardcoded inside the Dockerfiles or configuration files.
-
----
-
-## Building and Running
-
-From the project root:
+## Managing containers and volumes
 
 ```bash
-make rebuild
+docker compose -f srcs/docker-compose.yml ps                 # container status
+docker compose -f srcs/docker-compose.yml logs -f <service>  # follow one service's logs
+docker exec -it mariadb   sh                                  # shell into a container
+docker exec -it wordpress sh
+docker exec -it nginx     sh
+
+docker volume ls                     # mariadb_data, wordpress_data
+docker volume inspect mariadb_data   # see the real /home/<login>/data/mariadb path
 ```
 
-To stop the project:
+To reset everything (containers, images, volumes, and host data):
 
 ```bash
-make down
+make fclean
 ```
 
-To rebuild everything:
+## Where data lives and how it persists
 
-```bash
-make re
-```
-
----
-
-## Useful Docker Commands
-
-List running containers:
-
-```bash
-docker ps
-```
-
-View container logs:
-
-```bash
-docker logs nginx
-docker logs wordpress
-docker logs mariadb
-```
-
-Open a shell inside a container:
-
-```bash
-docker exec -it nginx bash
-docker exec -it wordpress bash
-docker exec -it mariadb bash
-```
-
-Stop all services:
-
-```bash
-make down
-```
-
----
-
-## Persistent Data
-
-The project uses two Docker named volumes:
-
-| Volume     | Host Location                   |
-| ---------- | ------------------------------- |
-| `db_data`  | `/home/iel-ghou/data/mariadb`   |
-| `wp_files` | `/home/iel-ghou/data/wordpress` |
-
-The MariaDB database is stored inside `db_data`, while the WordPress files are stored inside `wp_files`.
-
-Because these are persistent Docker volumes, removing or recreating containers does not delete the stored data. The website and database remain available after restarting the project unless the volumes are explicitly removed.
+- `mariadb_data` (named volume) is bind-backed by `driver_opts` to
+  `/home/<login>/data/mariadb` on the host, and mounted at `/var/lib/mysql` in the
+  `mariadb` container.
+- `wordpress_data` (named volume) is bind-backed to `/home/<login>/data/wordpress`, and
+  mounted at `/var/www/html` in **both** the `wordpress` and `nginx` containers (nginx
+  needs read access to serve static files and PHP handles requests via php-fpm on
+  port 9000).
+- Because both volumes are declared `external`-style named volumes pinned to a fixed
+  host path (not anonymous, not plain bind mounts), data survives `docker compose down`
+  and container recreation, and only disappears if you explicitly `make fclean` or
+  remove the volume/host directory yourself.
+- On first boot, `mariadb`'s entrypoint (`init_db.sh`) initializes the data directory
+  only if `/var/lib/mysql/mysql` doesn't already exist; likewise `wordpress`'s entrypoint
+  (`setup_wordpress.sh`) only runs `wp core install` if `wp-config.php` isn't already
+  present — so re-running `make up` on an existing volume is idempotent and won't
+  re-install over existing data.
