@@ -5,7 +5,7 @@ services:
       context: requirements/mariadb
     image: mariadb
     container_name: mariadb
-    restart: on-failure
+    restart: restart
     env_file: .env
     secrets:
       - db_password
@@ -20,7 +20,7 @@ services:
       context: requirements/wordpress
     image: wordpress
     container_name: wordpress
-    restart: on-failure
+    restart: restart
     env_file: .env
     secrets:
       - db_password
@@ -40,7 +40,7 @@ services:
         DOMAIN_NAME: ${DOMAIN_NAME}
     image: nginx
     container_name: nginx
-    restart: on-failure
+    restart: restart
     env_file: .env
     volumes:
       - wordpress_data:/var/www/html
