@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+case "$WP_ADMIN_USER" in 
+    *admin*|*Admin*|*administrator*|*Administrator*) 
+    echo "Error: WP_ADMIN_USER cannot contain 'admin' or 'administrator'." 
+    exit 1
+    ;;
+esac
+
 DB_PASSWORD=$(cat /run/secrets/db_password)
 WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_password)
 WP_USER_PASSWORD=$(cat /run/secrets/wp_user_password)
