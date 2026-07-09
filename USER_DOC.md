@@ -58,5 +58,5 @@ also tail logs with:
 make logs
 ```
 
-If a container crashed, `restart: on-failure` will bring it back up automatically; check
+If a container crashed, `restart: always` will bring it back up automatically; check
 `make logs` for the root cause.

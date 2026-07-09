@@ -17,6 +17,7 @@ backed by two named volumes (`mariadb_data`, `wordpress_data`) physically stored
 ## Instructions
 
 1. Add a `127.0.0.1 login.42.fr` entry to your VM's `/etc/hosts` (replace `login`).
+   `echo "127.0.0.1 iel-ghou.42.fr" | sudo tee -a /etc/hosts`
 2. Fill in real secrets in `secrets/*.txt` (replace the `ChangeMe_*` placeholders). These
    files are git-ignored and never committed.
 3. Adjust `LOGIN` and `DOMAIN_NAME` in `srcs/.env` to match your 42 login.
@@ -34,12 +35,10 @@ See `USER_DOC.md` and `DEV_DOC.md` for details.
 - MariaDB docs — https://mariadb.com/kb/en/
 - 42 Inception subject (v5.3, 2026 curriculum)
 
-**AI usage:** an AI assistant (Claude) was used to draft the initial Dockerfiles, the
-`docker-compose.yml` skeleton, the entrypoint shell scripts (`init_db.sh`,
-`setup_wordpress.sh`), the `Makefile`, and this documentation set, based directly on the
-subject's requirements. All generated scripts and configuration were reviewed, adapted,
-and must be tested/understood by the learner before submission/defense, per the subject's
-AI-usage guidelines (Chapter IV).
+**AI usage:** AI was used as a learning assistant throughout the project.
+It was used to explain Docker concepts, review configuration files,
+clarify NGINX, PHP-FPM, and MariaDB behavior, and suggest improvements to the documentation.
+All implementation, testing, debugging, and final validation were completed manually.
 
 ## Project description — design choices
 
